@@ -162,6 +162,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>medusa-proxy</finalName>
     </build>
 
 </project>
