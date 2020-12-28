@@ -1,0 +1,112 @@
+<ROSMessage name="Errors">
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179271.30</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179255.28</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179239.25</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179223.22</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179207.20</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179191.18</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179175.14</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179159.11</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179143.05</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179127.03</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179111.01</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179095.00</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179078.97</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179062.95</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179046.91</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179030.89</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609179014.87</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609178998.85</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609178982.83</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609178966.81</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609178950.78</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+    <VAR>
+        <NODE>/safety_feature</NODE>
+        <TIME>1609178934.75</TIME>
+        <MSG>No Safety Client, setting Thrusters to zero</MSG>
+    </VAR>
+</ROSMessage>
