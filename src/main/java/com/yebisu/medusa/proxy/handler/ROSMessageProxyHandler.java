@@ -29,19 +29,21 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     private String urlROSMessageState;
 
     @Override
-    public Content pingForROSMessageState() {
-        return invokeROSMessage();
+    public Content pingForROSMessageState(final String ip) {
+        return invokeROSMessage(ip);
     }
 
-    private Content invokeROSMessage() {
+    private Content invokeROSMessage(String ip) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))
                 .version(HttpClient.Version.HTTP_2)
                 .build();
 
+        String uri = "http://" + ip + urlROSMessageState;
+        log.info("The URI: {}",uri);
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(urlROSMessageState))
+                .uri(URI.create(uri))
                 .build();
 
         HttpResponse<String> httpResponse;
@@ -49,7 +51,8 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
             httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             log.info(httpResponse.body());
         } catch (IOException | InterruptedException exception) {
-            log.error("An error occurred while invoking the ROSMessage in the proxy");
+            log.error("An error occurred while invoking the ROSMessage in the proxy. " +
+                    "Please certify that vehicle IP is correct or if medusa launcher is running on VM");
             exception.printStackTrace();
             Thread.currentThread().interrupt();
             throw new IllegalStateException(INTERNAL_SERVER_ERROR);
