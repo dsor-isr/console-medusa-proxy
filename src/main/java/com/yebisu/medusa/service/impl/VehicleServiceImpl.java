@@ -17,8 +17,8 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleStateMapper vehicleStateMapper;
 
     @Override
-    public VehicleState getState() {
-        Content content = rosMessageProxy.pingForROSMessageState();
+    public VehicleState getState(final String ip) {
+        Content content = rosMessageProxy.pingForROSMessageState(ip);
         return vehicleStateMapper.mapFom(content);
     }
 }
