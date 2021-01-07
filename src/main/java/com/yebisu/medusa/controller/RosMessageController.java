@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 
@@ -22,9 +23,9 @@ public class RosMessageController {
     private final VehicleService vehicleService;
 
     @PostMapping(value = "/state")
-    public Flux<VehicleState> getState(@RequestBody @Valid final VehicleStateInputDto vehicleStateInput) {
+    public Mono<VehicleState> getState(@RequestBody @Valid final VehicleStateInputDto vehicleStateInput) {
         log.info("GET: Vehicle state: {}", vehicleStateInput);
-        return Flux.just(vehicleService.getState(vehicleStateInput.getVehicleIP()))
+        return Mono.just(vehicleService.getState(vehicleStateInput.getVehicleIP()))
                 .log();
     }
 }
