@@ -40,7 +40,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
                 .build();
 
         String uri = "http://" + ip + urlROSMessageState;
-        log.info("The URI: {}",uri);
+        log.debug("The URI: {}",uri);
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))
@@ -49,7 +49,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
         HttpResponse<String> httpResponse;
         try {
             httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            log.info(httpResponse.body());
+            log.debug(httpResponse.body());
         } catch (IOException | InterruptedException exception) {
             log.error("An error occurred while invoking the ROSMessage in the proxy. " +
                     "Please certify that vehicle IP is correct or if medusa launcher is running on VM");
