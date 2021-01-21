@@ -5,6 +5,9 @@ import com.yebisu.medusa.service.dto.VehicleState;
 import reactor.core.publisher.Mono;
 
 public interface VehicleService {
-    Mono<VehicleConfiguration> saveConfiguration(VehicleConfiguration vehicleConfiguration);
+    Mono<VehicleConfiguration> create(VehicleConfiguration vehicleConfiguration);
+
+    Mono<VehicleConfiguration> findById(String id);
+
     VehicleState getState(String ip);
 }
