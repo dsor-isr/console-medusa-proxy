@@ -6,10 +6,10 @@ import com.yebisu.medusa.domain.VehicleDetailedInfo;
 import com.yebisu.medusa.domain.VehicleGraphics;
 import com.yebisu.medusa.domain.vehicleResponseVariable;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = MedusaProxyApplication.class)
 public class VehicleRepositoryTest {
 
@@ -47,7 +47,7 @@ public class VehicleRepositoryTest {
     @Test
     public void givenId_whenFindById_ReturnIfExists() {
         Mono<VehicleConfiguration> vehicleConfigMono = vehicleRepository.save(buildVehicleConfig());
-        Optional<VehicleConfiguration> optionalResult = vehicleConfigMono.blockOptional(Duration.ofMillis(50));
+        Optional<VehicleConfiguration> optionalResult = vehicleConfigMono.blockOptional(Duration.ofSeconds(5));
 
         assertNotEquals(Optional.empty(), optionalResult);
         Mono<VehicleConfiguration> foundVehicleConfigMono = vehicleRepository.findById(optionalResult.get().getId());
@@ -62,9 +62,6 @@ public class VehicleRepositoryTest {
 
     }
 
-    public void givenInvalidId_whenFindById_ThrowResourceNotFoundException() {
-
-    }
 
     private VehicleConfiguration buildVehicleConfig() {
         var vehicleResponseVariable = new vehicleResponseVariable();
