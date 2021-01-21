@@ -2,6 +2,7 @@ package com.yebisu.medusa.service;
 
 import com.yebisu.medusa.domain.VehicleConfiguration;
 import com.yebisu.medusa.service.dto.VehicleState;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface VehicleService {
@@ -10,4 +11,6 @@ public interface VehicleService {
     Mono<VehicleConfiguration> findById(String id);
 
     VehicleState getState(String ip);
+
+    Flux<VehicleConfiguration> findAll();
 }
