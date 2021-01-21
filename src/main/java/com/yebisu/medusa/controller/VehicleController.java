@@ -6,6 +6,7 @@ import com.yebisu.medusa.domain.VehicleConfiguration;
 import com.yebisu.medusa.service.VehicleService;
 import com.yebisu.medusa.util.API;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,5 +43,17 @@ public class VehicleController {
     public Flux<VehicleConfiguration> findAll() {
       return vehicleService.findAll()
               .log();
+    }
+
+    @DeleteMapping("/configuration/{id}")
+    public Mono<Void> deleteById(@PathVariable final String id){
+        return vehicleService.deleteById(id)
+                .log();
+    }
+
+    @DeleteMapping("/configuration")
+    public Mono<Void> deleteAll(){
+       return vehicleService.deleteAll()
+               .log();
     }
 }
