@@ -16,7 +16,7 @@ public class VehicleConfigurationDTO {
     private String name;
     @NotEmpty(message = "ipAddress is hardly required")
     private String ipAddress;
-    @NotEmpty(message = "newVehicle is hardly required")
+    @NotNull(message = "newVehicle is hardly required")
     private Boolean newVehicle;
     @NotNull(message = "vehicleResponseVariables are required")
     private List<vehicleResponseVariableDTO> vehicleResponseVariables;
