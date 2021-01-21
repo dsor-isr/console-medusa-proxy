@@ -43,4 +43,19 @@ public class VehicleServiceImpl implements VehicleService {
         Content content = rosMessageProxy.pingForROSMessageState(ip);
         return vehicleStateMapper.mapFom(content);
     }
+
+    @Override
+    public Mono<Void> deleteById(String id) {
+        return vehicleRepository.findById(id)
+                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle config with id: %s", id))))
+                .doOnNext(vehicle -> vehicleRepository.deleteById(id))
+                .doOnSuccess(vehicleConfiguration -> log.info("Vehicle configuration with id {} has been deleted",id))
+                .then();
+
+    }
+
+    @Override
+    public Mono<Void> deleteAll() {
+        return vehicleRepository.deleteAll();
+    }
 }

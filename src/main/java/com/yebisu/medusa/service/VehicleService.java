@@ -13,4 +13,8 @@ public interface VehicleService {
     VehicleState getState(String ip);
 
     Flux<VehicleConfiguration> findAll();
+
+    Mono<Void> deleteAll();
+
+    Mono<Void> deleteById(String id);
 }
