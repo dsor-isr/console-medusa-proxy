@@ -10,7 +10,6 @@ import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.domain.DomainEvents;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -47,5 +46,12 @@ public class VehicleConfiguration {
             vehicleResponseVariables = new ArrayList<>();
         }
         return vehicleResponseVariables;
+    }
+
+    public List<Coordinates> getCoordinates() {
+        if (coordinates == null){
+            coordinates = new ArrayList<>();
+        }
+        return coordinates;
     }
 }

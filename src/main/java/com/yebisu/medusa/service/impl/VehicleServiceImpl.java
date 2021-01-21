@@ -1,6 +1,8 @@
 package com.yebisu.medusa.service.impl;
 
 import com.yebisu.medusa.domain.VehicleConfiguration;
+import com.yebisu.medusa.exception.CustomException;
+import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.ROSMessageProxy;
 import com.yebisu.medusa.proxy.model.Content;
 import com.yebisu.medusa.repository.VehicleRepository;
@@ -21,9 +23,15 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository;
 
     @Override
-    public Mono<VehicleConfiguration> saveConfiguration(VehicleConfiguration vehicleConfiguration) {
+    public Mono<VehicleConfiguration> create(VehicleConfiguration vehicleConfiguration) {
       return   vehicleRepository.save(vehicleConfiguration)
               .doOnError(Throwable::printStackTrace);
+    }
+
+    @Override
+    public Mono<VehicleConfiguration> findById(String id) {
+        return vehicleRepository.findById(id)
+                .switchIfEmpty(Mono.error(()-> new ResourceNotFoundException(String.format("Couldn't find any vehicle config with id: %s",id))));
     }
 
     @Override

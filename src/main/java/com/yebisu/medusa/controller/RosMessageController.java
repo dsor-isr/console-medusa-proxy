@@ -24,8 +24,9 @@ public class RosMessageController {
 
     @PostMapping(value = "/state")
     public Mono<VehicleState> getState(@RequestBody @Valid final VehicleStateInputDTO vehicleStateInput) {
-        log.info("GET: Vehicle state: {}", vehicleStateInput);
-        return Mono.just(vehicleService.getState(vehicleStateInput.getVehicleIP()));
+        log.debug("GET: Vehicle state: {}", vehicleStateInput);
+        return Mono.just(vehicleService.getState(vehicleStateInput.getVehicleIP()))
+                .log();
     }
 
 }
