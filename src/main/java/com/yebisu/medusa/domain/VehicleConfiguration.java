@@ -31,7 +31,7 @@ public class VehicleConfiguration {
     private String ipAddress;
     private Boolean newVehicle;
     private List<vehicleResponseVariable> vehicleResponseVariables;
-    private List<Coordinates> coordinates;
+    private Coordinates coordinates;
     private VehicleGraphics vehicleGraphics;
     private VehicleDetailedInfo vehicleDetailedInfo;
 
@@ -46,12 +46,5 @@ public class VehicleConfiguration {
             vehicleResponseVariables = new ArrayList<>();
         }
         return vehicleResponseVariables;
-    }
-
-    public List<Coordinates> getCoordinates() {
-        if (coordinates == null){
-            coordinates = new ArrayList<>();
-        }
-        return coordinates;
     }
 }

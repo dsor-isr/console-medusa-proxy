@@ -1,7 +1,6 @@
 package com.yebisu.medusa.service.impl;
 
 import com.yebisu.medusa.domain.VehicleConfiguration;
-import com.yebisu.medusa.exception.CustomException;
 import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.ROSMessageProxy;
 import com.yebisu.medusa.proxy.model.Content;
@@ -12,6 +11,7 @@ import com.yebisu.medusa.service.mapper.VehicleStateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -24,14 +24,18 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Mono<VehicleConfiguration> create(VehicleConfiguration vehicleConfiguration) {
-      return   vehicleRepository.save(vehicleConfiguration)
-              .doOnError(Throwable::printStackTrace);
+        return vehicleRepository.save(vehicleConfiguration);
     }
 
     @Override
     public Mono<VehicleConfiguration> findById(String id) {
         return vehicleRepository.findById(id)
-                .switchIfEmpty(Mono.error(()-> new ResourceNotFoundException(String.format("Couldn't find any vehicle config with id: %s",id))));
+                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle config with id: %s", id))));
+    }
+
+    @Override
+    public Flux<VehicleConfiguration> findAll() {
+        return vehicleRepository.findAll();
     }
 
     @Override
