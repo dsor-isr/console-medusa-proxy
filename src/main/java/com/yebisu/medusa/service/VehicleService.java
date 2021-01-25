@@ -14,6 +14,8 @@ public interface VehicleService {
 
     Flux<VehicleConfiguration> findAll();
 
+    Mono<VehicleConfiguration> update(String id, VehicleConfiguration vehicleConfiguration);
+
     Mono<Void> deleteAll();
 
     Mono<Void> deleteById(String id);

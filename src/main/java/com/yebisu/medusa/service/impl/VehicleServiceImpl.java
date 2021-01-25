@@ -55,4 +55,15 @@ public class VehicleServiceImpl implements VehicleService {
     public Mono<Void> deleteAll() {
         return vehicleRepository.deleteAll();
     }
+
+    @Override
+    public Mono<VehicleConfiguration> update(final String id, final VehicleConfiguration vehicleConfiguration) {
+        return findById(id)
+                .doOnNext(vehicleConfig -> log.info("Updating vehicle config : {}", vehicleConfig))
+                .doOnSuccess(vehicleConfig -> {
+                    vehicleConfiguration.setId(vehicleConfig.getId());
+                    vehicleRepository.save(vehicleConfiguration);
+                });
+
+    }
 }
