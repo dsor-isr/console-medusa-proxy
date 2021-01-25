@@ -33,21 +33,18 @@ public class VehicleController {
     public Mono<VehicleConfigurationDTO> createConfiguration(@RequestBody @Valid final VehicleConfigurationDTO vehicleConfigurationDTO) {
         VehicleConfiguration vehicleConfiguration = vehicleMapper.mapTo(vehicleConfigurationDTO);
         return vehicleService.create(vehicleConfiguration)
-                .map(this.vehicleMapper::mapTo)
-                .log();
+                .map(this.vehicleMapper::mapTo);
     }
 
     @GetMapping("/configuration/{id}")
     public Mono<VehicleConfigurationDTO> findById(@PathVariable final String id) {
         return vehicleService.findById(id)
-                .map(vehicleMapper::mapTo)
-                .log();
+                .map(vehicleMapper::mapTo);
     }
 
     @GetMapping("/configuration")
     public Flux<VehicleConfiguration> findAll() {
-        return vehicleService.findAll()
-                .log();
+        return vehicleService.findAll();
     }
 
     @PutMapping("/configuration/{id}")
@@ -60,14 +57,12 @@ public class VehicleController {
     @DeleteMapping("/configuration/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> deleteById(@PathVariable final String id) {
-        return vehicleService.deleteById(id)
-                .log();
+        return vehicleService.deleteById(id);
     }
 
     @DeleteMapping("/configuration")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> deleteAll() {
-        return vehicleService.deleteAll()
-                .log();
+        return vehicleService.deleteAll();
     }
 }
