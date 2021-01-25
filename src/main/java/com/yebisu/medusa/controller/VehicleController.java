@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -45,21 +46,28 @@ public class VehicleController {
 
     @GetMapping("/configuration")
     public Flux<VehicleConfiguration> findAll() {
-      return vehicleService.findAll()
-              .log();
+        return vehicleService.findAll()
+                .log();
+    }
+
+    @PutMapping("/configuration/{id}")
+    public Mono<VehicleConfigurationDTO> update(@PathVariable String id, @RequestBody @Valid VehicleConfigurationDTO vehicleConfigurationDTO) {
+        VehicleConfiguration vehicleConfiguration = vehicleMapper.mapTo(vehicleConfigurationDTO);
+        return vehicleService.update(id, vehicleConfiguration)
+                .map(vehicleMapper::mapTo);
     }
 
     @DeleteMapping("/configuration/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Mono<Void> deleteById(@PathVariable final String id){
+    public Mono<Void> deleteById(@PathVariable final String id) {
         return vehicleService.deleteById(id)
                 .log();
     }
 
     @DeleteMapping("/configuration")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Mono<Void> deleteAll(){
-       return vehicleService.deleteAll()
-               .log();
+    public Mono<Void> deleteAll() {
+        return vehicleService.deleteAll()
+                .log();
     }
 }
