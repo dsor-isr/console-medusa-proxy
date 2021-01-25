@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 public class VehicleServiceImpl implements VehicleService {
+    public static final String NOT_FOUND_BY_ID = "Couldn't find any vehicle config with id: %s";
     private final ROSMessageProxy rosMessageProxy;
     private final VehicleStateMapper vehicleStateMapper;
     private final VehicleRepository vehicleRepository;
@@ -30,7 +31,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Mono<VehicleConfiguration> findById(String id) {
         return vehicleRepository.findById(id)
-                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle config with id: %s", id))));
+                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format(NOT_FOUND_BY_ID, id))));
     }
 
     @Override
@@ -46,9 +47,10 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Mono<Void> deleteById(String id) {
-        return vehicleRepository.deleteById(id)
-                .doOnSuccess(vehicleConfiguration -> log.info("Vehicle configuration with id {} has been deleted", id))
-                .then();
+        return vehicleRepository.findById(id)
+                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format(NOT_FOUND_BY_ID, id))))
+                .doOnSuccess(existingVehicle -> log.info("Deleting the Vehicle configuration: {}", existingVehicle))
+                .flatMap(existingVehicleConfig -> vehicleRepository.deleteById(id));
     }
 
     @Override
@@ -58,12 +60,12 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Mono<VehicleConfiguration> update(final String id, final VehicleConfiguration vehicleConfiguration) {
-        return findById(id)
-                .doOnNext(vehicleConfig -> log.info("Updating vehicle config : {}", vehicleConfig))
-                .doOnSuccess(vehicleConfig -> {
-                    vehicleConfiguration.setId(vehicleConfig.getId());
-                    vehicleRepository.save(vehicleConfiguration);
+        return vehicleRepository.findById(id)
+                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format(NOT_FOUND_BY_ID, id))))
+                .doOnSuccess(existingVehicle -> log.info("Updating the vehicle which old value is : {}, and new value is {}", existingVehicle, vehicleConfiguration))
+                .flatMap(existingVehicleConfig -> {
+                    vehicleConfiguration.setId(existingVehicleConfig.getId());
+                    return vehicleRepository.save(vehicleConfiguration);
                 });
-
     }
 }
