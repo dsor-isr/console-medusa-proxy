@@ -3,6 +3,7 @@ package com.yebisu.medusa.controller;
 import com.yebisu.medusa.controller.dto.VehicleStateInputDTO;
 import com.yebisu.medusa.service.VehicleService;
 import com.yebisu.medusa.service.dto.VehicleState;
+import com.yebisu.medusa.util.API;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +15,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/vehicle")
+@RequestMapping(API.VEHICLE_BASE_API)
 @RequiredArgsConstructor
 @Slf4j
 public class RosMessageController {
