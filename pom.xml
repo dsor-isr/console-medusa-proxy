@@ -22,6 +22,7 @@
         <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
         <io.github.open-feign.version>10.10.1</io.github.open-feign.version>
         <javax.xml.bind.version>1.4.0</javax.xml.bind.version>
+        <blockhound.version>1.0.3.RELEASE</blockhound.version>
     </properties>
 
     <dependencies>
@@ -109,10 +110,15 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.projectreactor/reactor-tools -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-tools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor.tools</groupId>
+            <artifactId>blockhound</artifactId>
+            <version>${blockhound.version}</version>
         </dependency>
 
         <dependency>
