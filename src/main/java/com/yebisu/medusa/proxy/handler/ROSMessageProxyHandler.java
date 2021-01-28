@@ -54,7 +54,6 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
             log.error("An error occurred while invoking the ROSMessage in the proxy. " +
                     "Please certify that vehicle IP is correct or if medusa launcher is running on VM");
             exception.printStackTrace();
-            Thread.currentThread().interrupt();
             throw new IllegalStateException(INTERNAL_SERVER_ERROR);
         }
 
