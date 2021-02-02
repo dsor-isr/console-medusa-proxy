@@ -1,4 +1,4 @@
-package com.yebisu.medusa.proxy.model;
+package com.yebisu.medusa.proxy.rosmessage.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

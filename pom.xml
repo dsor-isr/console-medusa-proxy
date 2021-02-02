@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.4.RELEASE</version>
+        <version>2.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.yebisu</groupId>
@@ -19,10 +19,7 @@
     <properties>
         <java.version>11</java.version>
         <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
-        <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
-        <io.github.open-feign.version>10.10.1</io.github.open-feign.version>
         <javax.xml.bind.version>1.4.0</javax.xml.bind.version>
-        <blockhound.version>1.0.3.RELEASE</blockhound.version>
     </properties>
 
     <dependencies>
@@ -39,13 +36,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <!-- feign dependencies -->
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
         <dependency>
@@ -68,35 +58,6 @@
             <version>2.3.0-b170127.1453</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.github.openfeign</groupId>-->
-<!--            <artifactId>feign-core</artifactId>-->
-<!--            <version>${io.github.open-feign.version}</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>io.github.openfeign</groupId>-->
-<!--            <artifactId>feign-jaxb</artifactId>-->
-<!--            <version>${io.github.open-feign.version}</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>io.github.openfeign</groupId>-->
-<!--            <artifactId>feign-soap</artifactId>-->
-<!--            <version>${io.github.open-feign.version}</version>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash; xml dependencies &ndash;&gt;-->
-
-<!--        <dependency>-->
-<!--            <groupId>javax.xml.soap</groupId>-->
-<!--            <artifactId>javax.xml.soap-api</artifactId>-->
-<!--            <version>${javax.xml.bind.version}</version>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash; sleuth dependencies &ndash;&gt;-->
-
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -108,23 +69,6 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-jdk8</artifactId>
             <version>${org.mapstruct.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.projectreactor/reactor-tools -->
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-tools</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor.tools</groupId>
-            <artifactId>blockhound</artifactId>
-            <version>${blockhound.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-test</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -146,17 +90,6 @@
 
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
