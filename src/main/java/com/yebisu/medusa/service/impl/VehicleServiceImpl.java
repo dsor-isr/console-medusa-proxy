@@ -2,6 +2,7 @@ package com.yebisu.medusa.service.impl;
 
 import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.configserver.ConfigServerProxy;
+import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
 import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.service.VehicleService;
@@ -24,11 +25,11 @@ public class VehicleServiceImpl implements VehicleService {
     public Mono<VehicleState> getState(final String vehicleId) {
         return configServerProxy.getVehicleConfigById(vehicleId)
                 .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle with id: %s id", vehicleId))))
-                .flatMap(vehicleConfigDTO -> getVehicleState(vehicleConfigDTO))
+                .flatMap(this::getVehicleState)
                 .map(vehicleStateMapper::mapFom);
     }
 
-    private Mono<Content> getVehicleState(com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO vehicleConfigDTO) {
+    private Mono<Content> getVehicleState(final VehicleConfigurationDTO vehicleConfigDTO) {
         final String ipAddress = vehicleConfigDTO.getIpAddress();
         Content content = rosMessageProxy.pingForROSMessageState(ipAddress);
         return Mono.just(content);
