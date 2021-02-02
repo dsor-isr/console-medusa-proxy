@@ -1,8 +1,8 @@
 //package com.yebisu.medusa.exception.handler;
 //
 //import com.yebisu.medusa.exception.ResourceNotFoundException;
-//import com.yebisu.medusa.exception.model.ErrorDetail;
-//import com.yebisu.medusa.exception.model.ValidationError;
+//import com.yebisu.medusa.exception.dto.ErrorDetail;
+//import com.yebisu.medusa.exception.dto.ValidationError;
 //import lombok.extern.slf4j.Slf4j;
 //import org.springframework.http.HttpHeaders;
 //import org.springframework.http.HttpStatus;

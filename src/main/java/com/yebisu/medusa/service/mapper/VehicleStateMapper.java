@@ -1,13 +1,13 @@
 package com.yebisu.medusa.service.mapper;
 
-import com.yebisu.medusa.proxy.model.Content;
-import com.yebisu.medusa.proxy.model.VAR;
+import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.service.dto.VehicleState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.function.Predicate;
+import com.yebisu.medusa.proxy.rosmessage.dto.VAR;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
