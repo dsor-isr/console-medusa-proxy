@@ -10,7 +10,7 @@ RUN mvn -f /home/app/pom.xml clean package
 #
 # Package stage
 #
-FROM adoptopenjdk/openjdk11
+FROM adoptopenjdk/openjdk11:alpine-slim
 ENV PORT 8080
 COPY --from=build /home/app/target/*.jar .
 ENTRYPOINT ["java","-jar", "medusa-proxy.jar"]
