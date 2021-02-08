@@ -1,5 +1,6 @@
 package com.yebisu.medusa.service.impl;
 
+import com.yebisu.medusa.exception.CustomException;
 import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.configserver.ConfigServerProxy;
 import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
