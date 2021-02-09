@@ -27,7 +27,7 @@ public class VehicleState {
     private String batteryLevel;
     private String altitude;
     private String status;
-    private String leaksUpper;
-    private String leaksLower;
-    private String opMode;
+    private boolean leaksUpper;
+    private boolean leaksLower;
+    private Integer opMode;
 }
