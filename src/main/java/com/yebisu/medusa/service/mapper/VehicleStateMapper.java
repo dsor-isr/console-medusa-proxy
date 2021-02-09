@@ -111,13 +111,13 @@ public class VehicleStateMapper {
                 vehicleState.setStatus(value);
                 break;
             case "leaksUpper":
-                vehicleState.setLeaksUpper(value);
+                vehicleState.setLeaksUpper(Boolean.getBoolean(value));
                 break;
             case "leaksLower":
-                vehicleState.setLeaksLower(value);
+                vehicleState.setLeaksLower(Boolean.getBoolean(value));
                 break;
             case "opMode":
-                vehicleState.setOpMode(value);
+                vehicleState.setOpMode(Integer.valueOf(value));
                 break;
             default:
                 break;
