@@ -27,7 +27,7 @@ public class RosMessageController {
     public Mono<VehicleState> getState(@PathVariable("id") final String vehicleId) {
         log.debug("GET: Vehicle state: {}", vehicleId);
         return vehicleService.getState(vehicleId)
-                .timeout(Duration.ofSeconds(1))
+                .timeout(Duration.ofMillis(800))
                 .log();
     }
 
