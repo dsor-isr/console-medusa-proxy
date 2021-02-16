@@ -22,7 +22,7 @@ public class ConfigServerProxyHandler implements ConfigServerProxy {
     public Mono<VehicleConfigurationDTO> getVehicleConfigById(final String id) {
         WebClient webClient = WebClient.create(vehicleConfigUrl);
         return webClient.get()
-                .uri("/configuration/" + id)
+                .uri("/" + id)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Client exception while invoking configServer")))

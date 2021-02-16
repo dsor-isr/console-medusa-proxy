@@ -1,7 +1,5 @@
 package com.yebisu.medusa.controller;
 
-import com.yebisu.medusa.exception.CustomException;
-import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.service.VehicleService;
 import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.util.API;
