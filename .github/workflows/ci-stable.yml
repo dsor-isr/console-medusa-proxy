@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Login
+        run: echo ${{secrets.GITHUB_TOKEN}} | docker login docker.pkg.github.com -u PascoalBayonne --password-stdin
+      - name: Docker Build
+        run: docker build -t medusa-proxy .
+      - name: Docker Tag
+        run: docker tag medusa-proxy docker.pkg.github.com/istyebisu/medusa-proxy/medusa-proxy:stable
+      - name: Docker Push
+        run: docker push docker.pkg.github.com/istyebisu/medusa-proxy/medusa-proxy:stable
