@@ -1,6 +1,8 @@
 package com.yebisu.medusa.service.impl;
 
-import com.yebisu.medusa.exception.CustomException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.yebisu.medusa.controller.dto.Point;
 import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.configserver.ConfigServerProxy;
 import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
@@ -10,6 +12,7 @@ import com.yebisu.medusa.service.VehicleService;
 import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.service.mapper.VehicleStateMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -21,6 +24,7 @@ public class VehicleServiceImpl implements VehicleService {
     private final ROSMessageProxy rosMessageProxy;
     private final ConfigServerProxy configServerProxy;
     private final VehicleStateMapper vehicleStateMapper;
+
 
     @Override
     public Mono<VehicleState> getState(final String vehicleId) {
@@ -34,5 +38,28 @@ public class VehicleServiceImpl implements VehicleService {
         final String ipAddress = vehicleConfigDTO.getIpAddress();
         Content content = rosMessageProxy.pingForROSMessageState(ipAddress);
         return Mono.just(content);
+    }
+
+    @Override
+    public Mono<Void> moveVehicleTo(final String vehicleId, final Point point) {
+        return configServerProxy.getVehicleConfigById(vehicleId)
+                .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle with id: %s id", vehicleId))))
+                .map(VehicleConfigurationDTO::getIpAddress)
+                .flatMap(vehicleIP -> moveVehicleByIP(point, vehicleIP))
+                .log()
+                .then();
+    }
+
+    private Mono<String> moveVehicleByIP(Point point, String vehicleIP) {
+        String coordinates = mapToJsonRequest(point);
+        return rosMessageProxy.moveVehicleTo(vehicleIP, coordinates);
+    }
+
+    @SneakyThrows
+    private String mapToJsonRequest(Point point) {
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = objectWriter.writeValueAsString(point);
+        log.info("The object to json is {}",json);
+        return json;
     }
 }
