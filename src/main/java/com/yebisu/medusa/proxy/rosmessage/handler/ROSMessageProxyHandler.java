@@ -1,10 +1,19 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
+import com.yebisu.medusa.exception.CustomException;
+import com.yebisu.medusa.exception.ResourceNotFoundException;
+import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,6 +36,9 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
     @Value("${vehicle.state.uri}")
     private String urlROSMessageState;
+
+    @Value("${vehicle.move.uri}")
+    private String vehicleMoveUri;
 
     @Override
     public Content pingForROSMessageState(final String ip) {
@@ -77,5 +89,17 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
             throw new IllegalStateException(INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @Override
+    public Mono<String> moveVehicleTo(String vehicleIP, String coordinates) {
+        String baseUri = "http://" + vehicleIP + vehicleMoveUri.concat(coordinates);
+              return  WebClient.create(baseUri)
+                .get()
+                .uri("/")
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Client exception while invoking configServer")))
+                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomException("Error while Invoking the configServer")))
+                .bodyToMono(String.class);
     }
 }

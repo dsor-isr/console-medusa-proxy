@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.yebisu</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>medusa-proxy</artifactId>
     <version>1.0.0</version>
     <name>medusa-proxy</name>
-    <description>Medusa proxy is the component which stores and manages the vehicle as well as stablishing the
+    <description>Medusa proxy is the component which stores and manages the vehicle as well as establishing the
         communication between web app (clients) and ist-legacy-back-end
     </description>
 
