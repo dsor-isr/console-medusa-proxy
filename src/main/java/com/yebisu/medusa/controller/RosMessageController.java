@@ -34,9 +34,10 @@ public class RosMessageController {
     }
 
     @PostMapping(value = "/{id}/move")
-    public Mono<Void> moveVehicleTo(@PathVariable("id") final String vehicleId, @RequestBody @Valid final Point point) {
+    public Mono<String> moveVehicleTo(@PathVariable("id") final String vehicleId, @RequestBody @Valid final Point point) {
         log.info("Moving the vehicle {} to coordinates: {}",vehicleId, point);
         return vehicleService.moveVehicleTo(vehicleId, point)
+                .timeout(Duration.ofSeconds(5))
                 .log();
     }
 

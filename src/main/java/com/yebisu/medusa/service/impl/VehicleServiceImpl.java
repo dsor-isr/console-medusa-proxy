@@ -11,7 +11,10 @@ import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.service.VehicleService;
 import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.service.mapper.VehicleStateMapper;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,25 +44,30 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Mono<Void> moveVehicleTo(final String vehicleId, final Point point) {
+    public Mono<String> moveVehicleTo(final String vehicleId, final Point point) {
         return configServerProxy.getVehicleConfigById(vehicleId)
                 .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle with id: %s id", vehicleId))))
-                .map(VehicleConfigurationDTO::getIpAddress)
-                .flatMap(vehicleIP -> moveVehicleByIP(point, vehicleIP))
-                .log()
-                .then();
+                .flatMap(vehicleIP -> moveVehicleByIP(point, vehicleIP.getIpAddress()))
+                .log();
     }
 
     private Mono<String> moveVehicleByIP(Point point, String vehicleIP) {
-        String coordinates = mapToJsonRequest(point);
-        return rosMessageProxy.moveVehicleTo(vehicleIP, coordinates);
+        String coordinates = mapToJsonRequest(point).replaceAll("\\s+","");
+        log.info("The object to json is {}",coordinates);
+        return rosMessageProxy.moveVehicleTo(vehicleIP, point);
     }
 
     @SneakyThrows
     private String mapToJsonRequest(Point point) {
+        PonitDTO dto = new PonitDTO(point);
         ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = objectWriter.writeValueAsString(point);
-        log.info("The object to json is {}",json);
-        return json;
+       return objectWriter.writeValueAsString(dto);
     }
+}
+
+@Getter
+@Setter
+@AllArgsConstructor
+class PonitDTO{
+    private Point point;
 }
