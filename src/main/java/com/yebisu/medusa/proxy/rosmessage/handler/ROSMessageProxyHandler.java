@@ -91,20 +91,23 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     }
 
     /**
-     * Returns a string whose value is an OK or NOT OK from medusa
-     * This method is responsible to make a vehicle move.
-     * removed.
-     * <p>
-     * @return  a string whose value is this string, with all leading
-     *          and trailing white space removed
+     * This method is responsible to make a vehicle move to.
+     * a specified place.
      *
-     * @see Character#isWhitespace(int)
+     * @param vehicleIP the the vehicle IP address which can be provided by
+     *                  configuration server microservice.
+     *                  may not be {@code blank}
+     * @param point     the which represents the coordinates X or Y
+     *                  may not be {@code null}
      *
-     * @since 11
+     *                  In order to build the uri its more convenient to use
+     *                  the MessageFormat instead of String.format but the
+     *                  uri itself is not self described
+     * @return Returns a string whose value is an OK or NOT OK from medusa
      */
 
     @Override
-    public Mono<String> moveVehicleTo(String vehicleIP, Point point) {
+    public Mono<String> moveVehicleTo(final String vehicleIP, final Point point) {
         final String pointStamped = "{PointStamped{point:{x:%s,y:%s}}";
         String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
         return WebClient.create(baseUri)

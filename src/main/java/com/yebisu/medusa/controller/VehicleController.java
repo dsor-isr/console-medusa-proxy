@@ -21,7 +21,7 @@ import java.time.Duration;
 @RequestMapping(API.VEHICLE_BASE_API)
 @RequiredArgsConstructor
 @Slf4j
-public class RosMessageController {
+public class VehicleController {
 
     private final VehicleService vehicleService;
 
