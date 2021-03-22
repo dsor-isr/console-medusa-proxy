@@ -11,11 +11,7 @@ import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.service.VehicleService;
 import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.service.mapper.VehicleStateMapper;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -52,22 +48,8 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     private Mono<String> moveVehicleByIP(Point point, String vehicleIP) {
-        String coordinates = mapToJsonRequest(point).replaceAll("\\s+","");
-        log.info("The object to json is {}",coordinates);
         return rosMessageProxy.moveVehicleTo(vehicleIP, point);
     }
 
-    @SneakyThrows
-    private String mapToJsonRequest(Point point) {
-        PonitDTO dto = new PonitDTO(point);
-        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
-       return objectWriter.writeValueAsString(dto);
-    }
-}
 
-@Getter
-@Setter
-@AllArgsConstructor
-class PonitDTO{
-    private Point point;
 }
