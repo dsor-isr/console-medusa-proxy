@@ -1,11 +1,10 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
+import com.yebisu.medusa.controller.dto.Point;
 import com.yebisu.medusa.exception.CustomException;
 import com.yebisu.medusa.exception.ResourceNotFoundException;
-import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
-import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
-import lombok.RequiredArgsConstructor;
+import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +51,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
                 .build();
 
         String uri = "http://" + ip + urlROSMessageState;
-        log.debug("The URI: {}",uri);
+        log.debug("The URI: {}", uri);
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))
@@ -91,12 +90,26 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
     }
 
+    /**
+     * Returns a string whose value is an OK or NOT OK from medusa
+     * This method is responsible to make a vehicle move.
+     * removed.
+     * <p>
+     * @return  a string whose value is this string, with all leading
+     *          and trailing white space removed
+     *
+     * @see Character#isWhitespace(int)
+     *
+     * @since 11
+     */
+
     @Override
-    public Mono<String> moveVehicleTo(String vehicleIP, String coordinates) {
-        String baseUri = "http://" + vehicleIP + vehicleMoveUri.concat(coordinates);
-              return  WebClient.create(baseUri)
+    public Mono<String> moveVehicleTo(String vehicleIP, Point point) {
+        final String pointStamped = "{PointStamped{point:{x:%s,y:%s}}";
+        String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
+        return WebClient.create(baseUri)
                 .get()
-                .uri("/")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Client exception while invoking configServer")))
                 .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomException("Error while Invoking the configServer")))

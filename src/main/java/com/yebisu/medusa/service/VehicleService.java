@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 public interface VehicleService {
     Mono<VehicleState> getState(String vehicleId);
 
-    Mono<Void> moveVehicleTo(String vehicleId, Point dto);
+    Mono<String> moveVehicleTo(String vehicleId, Point dto);
 }
