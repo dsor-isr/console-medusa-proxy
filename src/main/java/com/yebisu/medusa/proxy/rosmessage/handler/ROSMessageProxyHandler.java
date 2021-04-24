@@ -112,9 +112,10 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     public Mono<String> moveVehicleTo(final String vehicleIP, final Point point) {
         final String pointStamped = "{point:{\"x\":%s,\"y\":%s}}";
         //String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
-        String baseUri = "http://192.168.1.89:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975\"}\"}";
+        String baseUri = "http://192.168.1.89:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
         log.info("Requesting medusa proxy with URL: {}",baseUri);
         String encode = UriUtils.encode(baseUri, StandardCharsets.UTF_8);
+        log.info("The URL Encoded: {} ",encode);
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))
                 .version(HttpClient.Version.HTTP_2)
