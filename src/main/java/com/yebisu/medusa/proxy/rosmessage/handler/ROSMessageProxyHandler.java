@@ -1,18 +1,12 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
 import com.yebisu.medusa.controller.dto.Point;
-import com.yebisu.medusa.exception.CustomException;
-import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 
 import javax.xml.bind.JAXBContext;
@@ -20,7 +14,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -101,7 +94,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
      *                  may not be {@code blank}
      * @param point     the which represents the coordinates X or Y
      *                  may not be {@code null}
-     *
+     *                  <p>
      *                  In order to build the uri its more convenient to use
      *                  the MessageFormat instead of String.format but the
      *                  uri itself is not self described
@@ -112,31 +105,18 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     public Mono<String> moveVehicleTo(final String vehicleIP, final Point point) {
         final String pointStamped = "{point:{\"x\":%s,\"y\":%s}}";
         //String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
-        String baseUri = "http://192.168.1.89:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
-        log.info("Requesting medusa proxy with URL: {}",baseUri);
-        String encode = UriUtils.encode(baseUri, StandardCharsets.UTF_8);
-        log.info("The URL Encoded: {} ",encode);
-        HttpClient httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(3))
-                .version(HttpClient.Version.HTTP_2)
-                .build();
+        String baseUri = "http://192.168.1.248:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
+        log.info("Requesting medusa proxy with URL: {}", baseUri);
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create(encode))
-                .build();
+        WebClient webClient = WebClient.create("http://192.168.1.248:7080/RSETWPRefgeometry_msgs");
 
-        HttpResponse<String> httpResponse;
-        try {
-            httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            log.debug(httpResponse.body());
-        } catch (IOException | InterruptedException exception) {
-            log.error("An error occurred while invoking the ROSMessage in the proxy. " +
-                    "Please certify that vehicle IP is correct or if medusa launcher is running on VM");
-            exception.printStackTrace();
-            throw new IllegalStateException(INTERNAL_SERVER_ERROR);
-        }
-
-        return Mono.just(httpResponse.body());
+        return webClient.get()
+                .uri(s -> s
+                        .path("/PointStamped")
+                        .queryParam("x", "{x}")
+                        .queryParam("y", "{y}")
+                        .build("point", "492261.6167762757", "4290026.3945034975"))
+                .retrieve()
+                .bodyToMono(String.class);
     }
 }
