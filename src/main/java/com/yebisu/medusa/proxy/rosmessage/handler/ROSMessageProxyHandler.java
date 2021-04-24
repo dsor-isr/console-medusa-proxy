@@ -109,15 +109,31 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     @Override
     public Mono<String> moveVehicleTo(final String vehicleIP, final Point point) {
         final String pointStamped = "{point:{\"x\":%s,\"y\":%s}}";
-        //String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
-        String baseUri = "http://192.168.1.248:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
+        String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
+        //String baseUri = "http://192.168.1.248:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
         log.info("Requesting medusa proxy with URL: {}",baseUri);
-        return WebClient.create(baseUri)
-                .get()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Client exception while invoking configServer")))
-                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomException("Error while Invoking the configServer")))
-                .bodyToMono(String.class);
+
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(3))
+                .version(HttpClient.Version.HTTP_2)
+                .build();
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create(baseUri))
+                .build();
+
+        HttpResponse<String> httpResponse;
+        try {
+            httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            log.debug(httpResponse.body());
+        } catch (IOException | InterruptedException exception) {
+            log.error("An error occurred while invoking the ROSMessage in the proxy. " +
+                    "Please certify that vehicle IP is correct or if medusa launcher is running on VM");
+            exception.printStackTrace();
+            throw new IllegalStateException(INTERNAL_SERVER_ERROR);
+        }
+
+        return Mono.just(httpResponse.body());
     }
 }
