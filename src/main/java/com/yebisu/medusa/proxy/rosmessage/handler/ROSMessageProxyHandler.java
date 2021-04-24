@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 
 import javax.xml.bind.JAXBContext;
@@ -19,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -110,9 +112,9 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     public Mono<String> moveVehicleTo(final String vehicleIP, final Point point) {
         final String pointStamped = "{point:{\"x\":%s,\"y\":%s}}";
         //String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
-        String baseUri = "http://192.168.1.248:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
+        String baseUri = "http://192.168.1.89:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975\"}\"}";
         log.info("Requesting medusa proxy with URL: {}",baseUri);
-
+        String encode = UriUtils.encode(baseUri, StandardCharsets.UTF_8);
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))
                 .version(HttpClient.Version.HTTP_2)
@@ -120,7 +122,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(baseUri))
+                .uri(URI.create(encode))
                 .build();
 
         HttpResponse<String> httpResponse;
