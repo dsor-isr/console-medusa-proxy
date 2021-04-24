@@ -110,6 +110,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     public Mono<String> moveVehicleTo(final String vehicleIP, final Point point) {
         final String pointStamped = "{PointStamped{point:{x:%s,y:%s}}";
         String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
+        log.info("Requesting medusa proxy with URL: {}",baseUri);
         return WebClient.create(baseUri)
                 .get()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
