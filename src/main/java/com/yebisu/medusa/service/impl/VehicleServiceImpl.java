@@ -11,6 +11,7 @@ import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.service.mapper.VehicleStateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -38,14 +39,14 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Mono<String> moveVehicleTo(final String vehicleId, final Point point) {
+    public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleId, final Point point) {
         return configServerProxy.getVehicleConfigById(vehicleId)
                 .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle with id: %s id", vehicleId))))
                 .flatMap(vehicleIP -> moveVehicleByIP(point, vehicleIP.getIpAddress()))
                 .log();
     }
 
-    private Mono<String> moveVehicleByIP(Point point, String vehicleIP) {
+    private Mono<ResponseEntity<Void>> moveVehicleByIP(Point point, String vehicleIP) {
         return rosMessageProxy.moveVehicleTo(vehicleIP, point);
     }
 
