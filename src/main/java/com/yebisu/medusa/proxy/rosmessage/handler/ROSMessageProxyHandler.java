@@ -155,12 +155,13 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
         //http://192.168.1.249:7080/RSET WPRef geometry_msgs/PointStamped {"point":{"x":492345.0841737075,"y":4290457.33631503}}
         //http://192.168.1.249:7080/RSET WPRef geometry_msgs/PointStamped {"point":{"x":492447.83664018963,"y":4290384.839702747}}
         try {
-            URL url = new URL(notEncoded);
+//            URL url = new URL(notEncoded);
+            URL url = new URL(notEncoded.replace(" ", "%20"));
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-            con.setRequestProperty("Content-Type", "application/json");
             log.info("{}", url);
             log.info("{}", con.getResponseCode());
+            con.disconnect();
         } catch (IOException e) {
             e.printStackTrace();
         }
