@@ -5,26 +5,17 @@ import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.cassandra.CassandraProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.ProxySelector;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -42,9 +33,6 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
     @Value("${vehicle.state.uri}")
     private String urlROSMessageState;
-
-    @Value("${vehicle.move.uri}")
-    private String vehicleMoveUri;
 
     @Override
     public Content pingForROSMessageState(final String ip) {
@@ -115,73 +103,16 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
     @Override
     public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleIP, final Point point) {
-        final String pointStamped = "{point:{\"x\":%s,\"y\":%s}}";
-        //String baseUri = "http://" + vehicleIP + vehicleMoveUri + String.format(pointStamped, point.getX(), point.getY());
-        String baseUri = "http://192.168.1.248:7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":492261.6167762757,\"y\":4290026.3945034975}}";
-
-//        WebClient webClient = WebClient.create("http://"+vehicleIP+":7080/RSETWPRefgeometry_msgs");
-
-        String allEncoded = UriUtils.encode("http://" + vehicleIP + ":7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}",
-                "UTF-8");
-        String notEncoded = "http://" + vehicleIP + ":7080/RSET WPRef geometry_msgs/PointStamped {\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}";
-        String extraUrlNoEncoding = "/PointStamped{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}";
-        String extraUrl = UriUtils.encode("/PointStamped{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}", "UTF-8");
-        String extra1Url = UriUtils.encode("/PointStamped{\"point\":{\"x\":" + point.getX(), "UTF-8");
-        String extra2Url = UriUtils.encode(",\"y\":" + point.getY() + "}}", "UTF-8");
-//        String extraUrl = extra1Url + extra2Url;
-        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
-//
-//http://192.168.1.249:7080/RSETWPRefgeometry_msgs%252FPointStamped%257B%2522point%2522%253A%257B%2522x%2522%253A492175.21594885114%252C%2522y%2522%253A4290642.706802326%257D%257D
-//http://192.168.1.249:7080/RSETWPRefgeometry_msgs%2FPointStamped%7B%22point%22%3A%7B%22x%22%3A492463.7815146467%2C%22y%22%3A4290517.83549251%7D%7D
-//http://192.168.1.249:7080/RSETWPRefgeometry_msgs%2FPointStamped%7B%22point%22%3A%7B%22x%22%3A492175.21594885114%2C%22y%22%3A4290642.706802326%7D%7D
-
-        WebClient webClient = WebClient.builder()
-                .baseUrl("http://" + vehicleIP + ":7080/RSETWPRefgeometry_msgs")
-//                .uriBuilderFactory(factory)
-                .filter(logRequest())
-                .build();
-
-
-        log.info("{}", URI.create(allEncoded));
-//        HttpRequest request = HttpRequest.newBuilder()
-//                    .uri(URI.create("http://" + vehicleIP + ":7080/RSETWPRefgeometry_msgs/PointStamped{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}"))
-//                    .GET()
-//                    .build();
-//            HttpClient.newBuilder()
-//                    .build()
-//                    .sendAsync(request, HttpResponse.BodyHandlers.ofString());
-
-        //http://192.168.1.249:7080/RSET WPRef geometry_msgs/PointStamped {"point":{"x":492345.0841737075,"y":4290457.33631503}}
-        //http://192.168.1.249:7080/RSET WPRef geometry_msgs/PointStamped {"point":{"x":492447.83664018963,"y":4290384.839702747}}
-        try {
-//            URL url = new URL(notEncoded);
-            URL url = new URL(notEncoded.replace(" ", "%20"));
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            log.info("{}", url);
-            log.info("{}", con.getResponseCode());
-            con.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-//        return webClient.get()
-//                .uri(s -> s
-//                        .path("{shittyUrl}")
-//                        .build(extraUrlNoEncoding))
-//                .retrieve()
-//                .toBodilessEntity();
-
-        return Mono.empty();
-    }
-
-    private static ExchangeFilterFunction logRequest() {
-        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
-            clientRequest.headers().forEach((name, values) -> values.forEach(value -> log.info("{}={}", name, value)));
-            return Mono.just(clientRequest);
-        });
+        return Mono
+                .fromCallable(() -> {
+                    URL url = new URL("http://" + vehicleIP + ":7080/RSET%20WPRef%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}");
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("GET");
+                    int responseCode = con.getResponseCode();
+                    con.disconnect();
+                    return responseCode;
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(i -> Mono.empty());
     }
 }
