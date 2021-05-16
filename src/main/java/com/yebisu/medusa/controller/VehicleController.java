@@ -6,6 +6,7 @@ import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.util.API;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,12 +30,11 @@ public class VehicleController {
     public Mono<VehicleState> getState(@PathVariable("id") final String vehicleId) {
         log.debug("GET: Vehicle state: {}", vehicleId);
         return vehicleService.getState(vehicleId)
-                .timeout(Duration.ofMillis(800))
-                .log();
+                .timeout(Duration.ofMillis(800));
     }
 
     @PostMapping(value = "/{id}/move")
-    public Mono<String> moveVehicleTo(@PathVariable("id") final String vehicleId, @RequestBody @Valid final Point point) {
+    public Mono<ResponseEntity<Void>> moveVehicleTo(@PathVariable("id") final String vehicleId, @RequestBody @Valid final Point point) {
         log.info("Moving the vehicle {} to coordinates: {}",vehicleId, point);
         return vehicleService.moveVehicleTo(vehicleId, point)
                 .timeout(Duration.ofSeconds(5))
