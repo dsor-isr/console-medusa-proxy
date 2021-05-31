@@ -1,7 +1,7 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
 import com.yebisu.medusa.controller.dto.Point;
-import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
+import com.yebisu.medusa.proxy.rosmessage.MedusaRestProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

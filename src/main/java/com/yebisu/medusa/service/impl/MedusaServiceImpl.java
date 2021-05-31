@@ -1,23 +1,26 @@
 package com.yebisu.medusa.service.impl;
 
 import com.yebisu.medusa.controller.dto.Point;
+import com.yebisu.medusa.controller.dto.VehicleDetails;
 import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.configserver.ConfigServerProxy;
 import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
-import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
-import com.yebisu.medusa.service.VehicleService;
+import com.yebisu.medusa.service.MedusaService;
 import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.service.mapper.VehicleStateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class VehicleServiceImpl implements VehicleService {
+public class MedusaServiceImpl implements MedusaService {
     private final ROSMessageProxy rosMessageProxy;
     private final ConfigServerProxy configServerProxy;
     private final VehicleStateMapper vehicleStateMapper;
@@ -38,16 +41,19 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Mono<String> moveVehicleTo(final String vehicleId, final Point point) {
+    public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleId, final Point point) {
         return configServerProxy.getVehicleConfigById(vehicleId)
                 .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any vehicle with id: %s id", vehicleId))))
                 .flatMap(vehicleIP -> moveVehicleByIP(point, vehicleIP.getIpAddress()))
                 .log();
     }
 
-    private Mono<String> moveVehicleByIP(Point point, String vehicleIP) {
+    private Mono<ResponseEntity<Void>> moveVehicleByIP(Point point, String vehicleIP) {
         return rosMessageProxy.moveVehicleTo(vehicleIP, point);
     }
 
-
+    @Override
+    public Mono<Void> executeMission(String missionId, List<VehicleDetails> vehicleDetails) {
+        return Mono.empty();
+    }
 }
