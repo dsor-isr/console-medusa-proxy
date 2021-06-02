@@ -1,6 +1,7 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
 import com.yebisu.medusa.controller.dto.Point;
+import com.yebisu.medusa.controller.dto.VehicleDetails;
 import com.yebisu.medusa.proxy.rosmessage.MedusaRestProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 
 @Component
 @Slf4j
-public class ROSMessageProxyHandler implements ROSMessageProxy {
+public class ROSMessageProxyHandler implements MedusaRestProxy {
 
     public static final String INTERNAL_SERVER_ERROR = "Internal Server error";
 
@@ -114,5 +116,10 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(i -> Mono.empty());
+    }
+
+    @Override
+    public Mono<Void> executeMission(String missionId, List<VehicleDetails> vehicleDetails) {
+        return null;
     }
 }
