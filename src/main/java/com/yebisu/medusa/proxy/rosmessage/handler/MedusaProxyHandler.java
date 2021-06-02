@@ -2,6 +2,7 @@ package com.yebisu.medusa.proxy.rosmessage.handler;
 
 import com.yebisu.medusa.controller.dto.Point;
 import com.yebisu.medusa.controller.dto.VehicleDetails;
+import com.yebisu.medusa.proxy.configserver.dto.MissionDTO;
 import com.yebisu.medusa.proxy.rosmessage.MedusaRestProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +26,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
-public class ROSMessageProxyHandler implements MedusaRestProxy {
+public class MedusaProxyHandler implements MedusaRestProxy {
 
     public static final String INTERNAL_SERVER_ERROR = "Internal Server error";
 
@@ -37,7 +41,7 @@ public class ROSMessageProxyHandler implements MedusaRestProxy {
     private String urlROSMessageState;
 
     @Override
-    public Content pingForROSMessageState(final String ip) {
+    public Content getVehicleState(final String ip) {
         return invokeROSMessage(ip);
     }
 
@@ -67,7 +71,7 @@ public class ROSMessageProxyHandler implements MedusaRestProxy {
 
         Path tempFile;
         try {
-            tempFile = Files.createTempFile("httpResponse", "xml");
+            tempFile = Files.createTempFile(LocalDateTime.now().toString(), "xml");
             Files.write(tempFile, httpResponse.body().getBytes(StandardCharsets.UTF_8));
         } catch (IOException exception) {
             log.error("An error occurred while trying to create a temp file");
@@ -119,7 +123,62 @@ public class ROSMessageProxyHandler implements MedusaRestProxy {
     }
 
     @Override
-    public Mono<Void> executeMission(String missionId, List<VehicleDetails> vehicleDetails) {
+    public Mono<Void> executeMission(MissionDTO missionDTO, List<VehicleDetails> vehicleDetails) {
+        //use what we have in image to build the url
+
+        Map<Integer, String> map = new LinkedHashMap<>();
+        vehicleDetails.forEach(vehicleDetail -> {
+
+            missionDTO.getLines().forEach(lineDTO -> {
+
+                var x = String.valueOf(lineDTO.getCoordinates().get(0).getX());
+                var y = String.valueOf(lineDTO.getCoordinates().get(0).getY());
+
+                var x1 = String.valueOf(lineDTO.getCoordinates().get(1).getX());
+                var y1 = String.valueOf(lineDTO.getCoordinates().get(1).getY());
+
+                var builder = new StringBuilder().append(x).append(y).append(x1).append(y1).append(vehicleDetail.getVelocity()).append("-1").toString();
+
+                map.put(lineDTO.getIndex(), builder);
+            });
+
+            missionDTO.getArcDTOS().stream().forEach(arcDTO -> {
+
+                var x = String.valueOf(arcDTO.getCoordinates().get(0).getX());
+                var y = String.valueOf(arcDTO.getCoordinates().get(0).getY());
+
+                var x1 = String.valueOf(arcDTO.getCoordinates().get(1).getX());
+                var y1 = String.valueOf(arcDTO.getCoordinates().get(1).getY());
+
+                var x2 = String.valueOf(arcDTO.getCoordinates().get(2).getX());
+                var y2 = String.valueOf(arcDTO.getCoordinates().get(2).getY());
+
+
+                var builder = new StringBuilder().append(x).append(y).append(x1).append(y1)
+                        .append(x2).append(y2)
+                        .append(vehicleDetail.getVelocity())
+                        .append(arcDTO.getDirection())
+                        .append(arcDTO.getRadius())
+                        .append("-1").toString();
+
+                map.put(arcDTO.getIndex(), builder);
+            });
+
+        });
+
+        //TODO: don;t forget the %20 while building the url
+        String url = "";
+        for (int i = 0; i <= map.size(); i++) {
+            url = url.concat(map.get(i));
+        }
+
+        //applyLawn rules
+        //LINE -15.20 -20.12 -14.49 13.36 0.30 -1
+        //LINE coordinate[0].x coordinate[0].y coordinate[1].x coordinate[1].y velocity -1 (minus 1 is the vehicle identifier)
+
+        // -14.49 13.36 -7.11 13.21 0.28 13.05 0.30 -1 7.38 -1
+        //ARC coordinate[0].x coordinate[0].y coordinate[1].x coordinate[1].y coordinate[1].x coordinate[1].y  velocity adirection (is inside the arcDTO) radius (in ARCDTO) <nVehicle> is -1 <gamma> <user data>
+
         return null;
     }
 }
