@@ -10,7 +10,6 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 public class CoordinatesDTO {
-    private Long x;
-    private Long y;
-    private Long z;
+    private String x;
+    private String y;
 }

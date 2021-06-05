@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Getter
@@ -13,5 +14,5 @@ import java.util.List;
 @NoArgsConstructor
 public class LineDTO {
     private Integer index;
-    private List<CoordinatesDTO> coordinates;
+    private List<CoordinatesDTO> coordinates = new LinkedList<>();;
 }

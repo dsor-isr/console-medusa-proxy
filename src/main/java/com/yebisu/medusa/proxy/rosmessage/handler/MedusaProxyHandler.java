@@ -1,14 +1,13 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
 import com.yebisu.medusa.controller.dto.Point;
-import com.yebisu.medusa.controller.dto.VehicleDetails;
-import com.yebisu.medusa.proxy.configserver.dto.MissionDTO;
 import com.yebisu.medusa.proxy.rosmessage.MedusaRestProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -27,15 +26,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Comparator;
 
 @Component
 @Slf4j
 public class MedusaProxyHandler implements MedusaRestProxy {
 
     public static final String INTERNAL_SERVER_ERROR = "Internal Server error";
+
 
     @Value("${vehicle.state.uri}")
     private String urlROSMessageState;
@@ -123,62 +121,32 @@ public class MedusaProxyHandler implements MedusaRestProxy {
     }
 
     @Override
-    public Mono<Void> executeMission(MissionDTO missionDTO, List<VehicleDetails> vehicleDetails) {
-        //use what we have in image to build the url
+    public Flux<Void> executeMission(final String coordinates, Flux<String> vehiclesIP) {
+        return Flux.from(vehiclesIP)
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+                .filter(vehicleIP -> !vehicleIP.isEmpty())
+                .map(vehicleIP-> composeURL(vehicleIP, coordinates))
+                .flatMap(composedURL -> invokeMedusaServer(composedURL).onErrorContinue((t, o) -> log.error("Skipped error: {}", t.getMessage())))
+                .ordered(Comparator.comparing(ResponseEntity::getStatusCode))
+                .flatMap(voidResponseEntity -> Flux.empty());
+    }
 
-        Map<Integer, String> map = new LinkedHashMap<>();
-        vehicleDetails.forEach(vehicleDetail -> {
+    private String composeURL(String vehicleIP, String coordinates){
+        var composedURI = "http://" + vehicleIP + ":7080/" + coordinates;
+        log.info("Invoking mission execute with URL: {}", composedURI);
+        return composedURI;
+    }
 
-            missionDTO.getLines().forEach(lineDTO -> {
-
-                var x = String.valueOf(lineDTO.getCoordinates().get(0).getX());
-                var y = String.valueOf(lineDTO.getCoordinates().get(0).getY());
-
-                var x1 = String.valueOf(lineDTO.getCoordinates().get(1).getX());
-                var y1 = String.valueOf(lineDTO.getCoordinates().get(1).getY());
-
-                var builder = new StringBuilder().append(x).append(y).append(x1).append(y1).append(vehicleDetail.getVelocity()).append("-1").toString();
-
-                map.put(lineDTO.getIndex(), builder);
-            });
-
-            missionDTO.getArcDTOS().stream().forEach(arcDTO -> {
-
-                var x = String.valueOf(arcDTO.getCoordinates().get(0).getX());
-                var y = String.valueOf(arcDTO.getCoordinates().get(0).getY());
-
-                var x1 = String.valueOf(arcDTO.getCoordinates().get(1).getX());
-                var y1 = String.valueOf(arcDTO.getCoordinates().get(1).getY());
-
-                var x2 = String.valueOf(arcDTO.getCoordinates().get(2).getX());
-                var y2 = String.valueOf(arcDTO.getCoordinates().get(2).getY());
-
-
-                var builder = new StringBuilder().append(x).append(y).append(x1).append(y1)
-                        .append(x2).append(y2)
-                        .append(vehicleDetail.getVelocity())
-                        .append(arcDTO.getDirection())
-                        .append(arcDTO.getRadius())
-                        .append("-1").toString();
-
-                map.put(arcDTO.getIndex(), builder);
-            });
-
-        });
-
-        //TODO: don;t forget the %20 while building the url
-        String url = "";
-        for (int i = 0; i <= map.size(); i++) {
-            url = url.concat(map.get(i));
-        }
-
-        //applyLawn rules
-        //LINE -15.20 -20.12 -14.49 13.36 0.30 -1
-        //LINE coordinate[0].x coordinate[0].y coordinate[1].x coordinate[1].y velocity -1 (minus 1 is the vehicle identifier)
-
-        // -14.49 13.36 -7.11 13.21 0.28 13.05 0.30 -1 7.38 -1
-        //ARC coordinate[0].x coordinate[0].y coordinate[1].x coordinate[1].y coordinate[1].x coordinate[1].y  velocity adirection (is inside the arcDTO) radius (in ARCDTO) <nVehicle> is -1 <gamma> <user data>
-
-        return null;
+    private Mono<ResponseEntity<Void>> invokeMedusaServer(final String composedURI) {
+        return Mono.fromCallable(() -> {
+            URL url = new URL(composedURI);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            int responseCode = con.getResponseCode();
+            con.disconnect();
+            return responseCode;
+        }).subscribeOn(Schedulers.boundedElastic())
+                .flatMap(i -> Mono.empty());
     }
 }

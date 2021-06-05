@@ -20,7 +20,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ConfigServerProxyHandler implements ConfigServerProxy {
 
-    private final WebClient webClient;
+    private static final WebClient WEB_CLIENT = WebClient.create();
+
     @Value("${config-server-vehicle-config-base-uri}")
     private String vehicleConfigUrl;
     @Value("${configserver.mission.base.uri}")
@@ -29,7 +30,7 @@ public class ConfigServerProxyHandler implements ConfigServerProxy {
     @Override
     public Mono<VehicleConfigurationDTO> getVehicleConfigById(final String id) {
         log.debug("find vehicle configuration by id: {}", id);
-        return webClient.get()
+        return WEB_CLIENT.get()
                 .uri(vehicleConfigUrl + "/" + id)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -40,8 +41,9 @@ public class ConfigServerProxyHandler implements ConfigServerProxy {
 
     @Override
     public Mono<MissionDTO> getMissionById(String missionId) {
-        return webClient.get()
-                .uri(missionBaseUrl + "/", missionId)
+        log.info("looking for mission with id: {}",missionId);
+        return WEB_CLIENT.get()
+                .uri(missionBaseUrl + "/"+missionId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, this::handleOnError)
