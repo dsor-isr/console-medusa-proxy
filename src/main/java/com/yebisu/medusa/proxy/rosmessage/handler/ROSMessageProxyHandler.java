@@ -105,7 +105,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
     public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleIP, final Point point) {
         return Mono
                 .fromCallable(() -> {
-                    URL url = new URL("http://" + vehicleIP + ":7080/RSET%20WPRef%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}");
+                    URL url = new URL("http://" + vehicleIP + ":7080/RSET%20/controls/send_wp_standard%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
                     int responseCode = con.getResponseCode();
