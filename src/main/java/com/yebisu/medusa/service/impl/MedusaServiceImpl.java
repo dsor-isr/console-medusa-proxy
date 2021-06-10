@@ -24,7 +24,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yebisu.medusa.util.HttpUtils.*;
@@ -81,11 +86,11 @@ public class MedusaServiceImpl implements MedusaService {
                 .map(VehicleDetails::getVehicleId)
                 .collect(Collectors.toSet());
 
-        Flux<String> ids = getVehicleById(vehicleIds)
+        Flux<String> vehicleIdsFlux = getVehicleById(vehicleIds)
                 .map(VehicleConfigurationDTO::getIpAddress);
         return configServerProxy.getMissionById(missionId)
                 .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any mission with id: %s id", missionId))))
-                .flatMap(missionDTO -> computeMission(missionDTO, ids, vehicleDetails));
+                .flatMap(missionDTO -> computeMission(missionDTO, vehicleIdsFlux, vehicleDetails));
 
     }
 
