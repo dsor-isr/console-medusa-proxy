@@ -3,6 +3,7 @@ package com.yebisu.medusa.proxy.rosmessage.handler;
 import com.yebisu.medusa.controller.dto.Point;
 import com.yebisu.medusa.proxy.rosmessage.MedusaRestProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
+import com.yebisu.medusa.util.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -107,46 +108,36 @@ public class MedusaProxyHandler implements MedusaRestProxy {
 
     @Override
     public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleIP, final Point point) {
-        return Mono
-                .fromCallable(() -> {
-                    URL url = new URL("http://" + vehicleIP + ":7080/RSET%20WPRef%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}");
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("GET");
-                    int responseCode = con.getResponseCode();
-                    con.disconnect();
-                    return responseCode;
-                })
+        final var urlConnection = "http://" + vehicleIP + ":7080/RSET%20WPRef%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}";
+        return Mono.fromCallable(() -> HttpUtils.supplyWithHttpConnector(urlConnection))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(i -> Mono.empty());
     }
 
     @Override
-    public Flux<Void> executeMission(final String coordinates, Flux<String> vehiclesIP) {
-        return Flux.from(vehiclesIP)
+    public Flux<Void> executeMission(final String coordinates, Flux<String> vehiclesIPs) {
+        return Flux.from(vehiclesIPs)
                 .parallel()
                 .runOn(Schedulers.boundedElastic())
                 .filter(vehicleIP -> !vehicleIP.isEmpty())
-                .map(vehicleIP-> composeURL(vehicleIP, coordinates))
-                .flatMap(composedURL -> invokeMedusaServer(composedURL).onErrorContinue((t, o) -> log.error("Skipped error: {}", t.getMessage())))
+                .map(vehicleIP -> composeURL(vehicleIP, coordinates))
+                .flatMap(composedURL -> invokeMedusaServer(composedURL)
+                        .onErrorContinue((t, o) -> log.error("Skipped error: {}", t.getMessage())))
                 .ordered(Comparator.comparing(ResponseEntity::getStatusCode))
                 .flatMap(voidResponseEntity -> Flux.empty());
     }
 
-    private String composeURL(String vehicleIP, String coordinates){
+    private String composeURL(String vehicleIP, String coordinates) {
         var composedURI = "http://" + vehicleIP + ":7080/" + coordinates;
         log.info("Invoking mission execute with URL: {}", composedURI);
         return composedURI;
     }
 
     private Mono<ResponseEntity<Void>> invokeMedusaServer(final String composedURI) {
-        return Mono.fromCallable(() -> {
-            URL url = new URL(composedURI);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            int responseCode = con.getResponseCode();
-            con.disconnect();
-            return responseCode;
-        }).subscribeOn(Schedulers.boundedElastic())
+        return Mono.fromCallable(() -> HttpUtils.supplyWithHttpConnector(composedURI))
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(i -> Mono.empty());
     }
+
+
 }

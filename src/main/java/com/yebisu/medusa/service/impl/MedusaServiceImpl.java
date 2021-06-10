@@ -14,8 +14,10 @@ import com.yebisu.medusa.proxy.rosmessage.dto.Content;
 import com.yebisu.medusa.service.MedusaService;
 import com.yebisu.medusa.service.dto.VehicleState;
 import com.yebisu.medusa.service.mapper.VehicleStateMapper;
+import com.yebisu.medusa.util.HttpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -25,11 +27,13 @@ import reactor.core.scheduler.Schedulers;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.yebisu.medusa.util.HttpUtils.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MedusaServiceImpl implements MedusaService {
-    private static final String PERCENT_TWENTY = "%20";
+
     private final MedusaRestProxy medusaRestProxy;
     private final ConfigServerProxy configServerProxy;
     private final VehicleStateMapper vehicleStateMapper;
@@ -71,20 +75,27 @@ public class MedusaServiceImpl implements MedusaService {
             throw new CustomException("no vehicle details provided. The collection is empty");
         }
 
-        Set<String> vehicleIds = vehicleDetails.stream().map(VehicleDetails::getVehicleId).collect(Collectors.toSet());
-        Flux<String> ids = getVehicleById(vehicleIds).map(VehicleConfigurationDTO::getIpAddress);
+        Set<String> vehicleIds = vehicleDetails.stream()
+                .filter(Objects::nonNull)
+                .filter(vehicleDetail-> StringUtils.isNotEmpty(vehicleDetail.getVehicleId()))
+                .map(VehicleDetails::getVehicleId)
+                .collect(Collectors.toSet());
 
+        Flux<String> ids = getVehicleById(vehicleIds)
+                .map(VehicleConfigurationDTO::getIpAddress);
         return configServerProxy.getMissionById(missionId)
                 .switchIfEmpty(Mono.error(() -> new ResourceNotFoundException(String.format("Couldn't find any mission with id: %s id", missionId))))
-                .flatMap(missionDTO -> {
-                    log.info(missionDTO.toString());
-                    String missionToExecute = prepareMissionExecution(missionDTO, vehicleDetails);
-                    Flux<Void> voidFlux = medusaRestProxy.executeMission(missionToExecute, ids);
-                    voidFlux.subscribe(response ->log.info("yooo "+response.toString()));
-                    return Mono.empty();
-                });
+                .flatMap(missionDTO -> computeMission(missionDTO, ids, vehicleDetails));
 
     }
+
+    private Mono<Void> computeMission(MissionDTO missionDTO, Flux<String> ids, List<VehicleDetails> vehicleDetails) {
+        final String missionToExecute = prepareMissionExecution(missionDTO, vehicleDetails);
+        medusaRestProxy.executeMission(missionToExecute, ids)
+                .subscribe(s -> log.info(s.toString()), Throwable::printStackTrace);
+        return Mono.empty();
+    }
+
 
     private Flux<VehicleConfigurationDTO> getVehicleById(Set<String> vehicleIds) {
         return Flux.fromIterable(vehicleIds)
@@ -95,30 +106,16 @@ public class MedusaServiceImpl implements MedusaService {
     }
 
     private String prepareMissionExecution(MissionDTO mission, List<VehicleDetails> vehicleDetails) {
-        var map = new LinkedHashMap<Integer, String>();
-        vehicleDetails.forEach(vehicleDetail -> composeCoordinates(mission, map, vehicleDetail));
+        var coordinateConcatenableMap = new LinkedHashMap<Integer, String>();
+        vehicleDetails.forEach(vehicleDetail -> composeCoordinates(mission, coordinateConcatenableMap, vehicleDetail));
 
-        var xRefPoint = "0.0 ";
-        var yRefPoint = "0.0 ";
-        var utmZone = "29S\t\t";
+        final var uri = new StringBuilder().append(MISSION_BASE_URI);
 
-        //TODO: INVOKE for each vehicle, maybe delegate this logic to the service
-        //TODO: ask figueira if we must add the vehicle ip instead of -1
-        StringBuilder uri = new StringBuilder()
-                .append("RSET%20Mission_String%20std_msgs/String%20")
-                .append(" {data: \"3\t\t")
-                .append(PERCENT_TWENTY)
-                .append(xRefPoint)
-                .append(PERCENT_TWENTY)
-                .append(yRefPoint)
-                .append(PERCENT_TWENTY)
-                .append(utmZone)
-                .append(PERCENT_TWENTY);
-
-        for (int i = 0; i <= map.size(); i++) {
-            uri.append(map.get(i)).append(PERCENT_TWENTY);
+        for (int i = 1; i <= coordinateConcatenableMap.size(); i++) {
+            uri.append(coordinateConcatenableMap.get(i));
         }
-        return uri.toString();
+
+        return StringUtils.removeEndIgnoreCase(uri.toString(), "%09%09").concat("\"%7D");
     }
 
 
@@ -129,27 +126,48 @@ public class MedusaServiceImpl implements MedusaService {
 
     private void computeArc(Map<Integer, String> map, VehicleDetails vehicleDetail, ArcDTO arcDTO) {
         final var arcs = new StringBuilder()
+                .append(HttpUtils.ARC)
+                .append(SPACE)
                 .append(arcDTO.getCoordinates().get(0).getX())
+                .append(SPACE)
                 .append(arcDTO.getCoordinates().get(0).getY())
+                .append(SPACE)
                 .append(arcDTO.getCoordinates().get(1).getX())
+                .append(SPACE)
                 .append(arcDTO.getCoordinates().get(1).getY())
+                .append(SPACE)
                 .append(arcDTO.getCoordinates().get(2).getX())
+                .append(SPACE)
                 .append(arcDTO.getCoordinates().get(2).getY())
+                .append(SPACE)
                 .append(vehicleDetail.getVelocity())
+                .append(SPACE)
                 .append(arcDTO.getDirection())
+                .append(SPACE)
                 .append(arcDTO.getRadius())
-                .append("-1").toString();
+                .append(SPACE)
+                .append("-1")
+                .append(SPACE)
+                .append("%09%09")
+                .toString();
         map.put(arcDTO.getIndex(), arcs);
     }
 
     private void computeLine(Map<Integer, String> map, VehicleDetails vehicleDetail, LineDTO lineDTO) {
         final var lines = new StringBuilder()
+                .append(LINE)
+                .append(SPACE)
                 .append(lineDTO.getCoordinates().get(0).getX())
+                .append(SPACE)
                 .append(lineDTO.getCoordinates().get(0).getY())
+                .append(SPACE)
                 .append(lineDTO.getCoordinates().get(1).getX())
+                .append(SPACE)
                 .append(lineDTO.getCoordinates().get(1).getY())
+                .append(SPACE)
                 .append(vehicleDetail.getVelocity())
-                .append("-1").toString();
+                .append(SPACE)
+                .append("-1").append(SPACE).append("%09%09").toString();
         map.put(lineDTO.getIndex(), lines);
     }
 }

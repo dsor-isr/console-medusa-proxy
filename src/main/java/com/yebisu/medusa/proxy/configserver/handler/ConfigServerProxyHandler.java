@@ -1,7 +1,5 @@
 package com.yebisu.medusa.proxy.configserver.handler;
 
-import com.yebisu.medusa.exception.CustomException;
-import com.yebisu.medusa.exception.ResourceNotFoundException;
 import com.yebisu.medusa.proxy.configserver.ConfigServerProxy;
 import com.yebisu.medusa.proxy.configserver.dto.MissionDTO;
 import com.yebisu.medusa.proxy.configserver.dto.VehicleConfigurationDTO;
@@ -34,16 +32,16 @@ public class ConfigServerProxyHandler implements ConfigServerProxy {
                 .uri(vehicleConfigUrl + "/" + id)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Client exception while invoking configServer")))
-                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomException("Error while Invoking the configServer")))
+                .onStatus(HttpStatus::is4xxClientError, this::handleOnError)
+                .onStatus(HttpStatus::is5xxServerError, this::handleOnError)
                 .bodyToMono(VehicleConfigurationDTO.class);
     }
 
     @Override
     public Mono<MissionDTO> getMissionById(String missionId) {
-        log.info("looking for mission with id: {}",missionId);
+        log.info("looking for mission with id: {}", missionId);
         return WEB_CLIENT.get()
-                .uri(missionBaseUrl + "/"+missionId)
+                .uri(missionBaseUrl + "/" + missionId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, this::handleOnError)
@@ -53,11 +51,9 @@ public class ConfigServerProxyHandler implements ConfigServerProxy {
                 .log();
     }
 
-    private Mono<? extends Throwable> handleOnError(ClientResponse clientResponse) {
-        Mono<String> errorMessageMono = clientResponse.bodyToMono(String.class);
-        return errorMessageMono.flatMap(errorMessage -> {
-            log.error("Error on webclient GET MISSION BY ID with message: {}", errorMessage);
-            return Mono.error(new RuntimeException(errorMessage));
-        });
+    private Mono<Exception> handleOnError(ClientResponse clientResponse) {
+        return clientResponse.bodyToMono(String.class)
+                .log()
+                .flatMap(errorMessage -> Mono.error(new RuntimeException(errorMessage)));
     }
 }

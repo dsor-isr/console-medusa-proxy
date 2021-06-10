@@ -15,5 +15,5 @@ public interface MedusaRestProxy {
 
     Mono<ResponseEntity<Void>> moveVehicleTo(String vehicleIP, Point point);
 
-    Flux<Void> executeMission(String coordinates, Flux<String> vehiclesIP);
+    Flux<Void> executeMission(String coordinates, Flux<String> vehiclesIPs);
 }
