@@ -20,27 +20,27 @@ import java.time.Duration;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api")
 @Slf4j
 @RequiredArgsConstructor
 public class MedusaRestController {
 
     private final MedusaService medusaService;
 
-    @PostMapping(value = "mission/{missionId}/execute")
+    @PostMapping(value = "/mission/{missionId}/execute")
     public Mono<Void> executeMission(@PathVariable String missionId,
                                      @RequestBody @Valid List<VehicleDetails> vehicleDetails) {
         return medusaService.executeMission(missionId, vehicleDetails);
     }
 
-    @GetMapping(value = "api/vehicle/{id}/state")
+    @GetMapping(value = "/vehicle/{id}/state")
     public Mono<VehicleState> getState(@PathVariable("id") final String vehicleId) {
         log.debug("GET: Vehicle state: {}", vehicleId);
         return medusaService.getState(vehicleId)
                 .timeout(Duration.ofMillis(800));
     }
 
-    @PostMapping(value = "api/vehicle/{id}/move")
+    @PostMapping(value = "/vehicle/{id}/move")
     public Mono<ResponseEntity<Void>> moveVehicleTo(@PathVariable("id") final String vehicleId, @RequestBody @Valid final Point point) {
         log.info("Moving the vehicle {} to coordinates: {}",vehicleId, point);
         return medusaService.moveVehicleTo(vehicleId, point)

@@ -16,9 +16,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -108,7 +106,7 @@ public class MedusaProxyHandler implements MedusaRestProxy {
 
     @Override
     public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleIP, final Point point) {
-        final var urlConnection = "http://" + vehicleIP + ":7080/RSET%20WPRef%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}";
+        final var urlConnection = "http://" + vehicleIP + ":7080/RSET%20/controls/send_wp_standard%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}";
         return Mono.fromCallable(() -> HttpUtils.supplyWithHttpConnector(urlConnection))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(i -> Mono.empty());
