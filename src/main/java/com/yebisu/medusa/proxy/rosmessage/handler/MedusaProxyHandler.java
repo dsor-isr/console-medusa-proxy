@@ -1,12 +1,14 @@
 package com.yebisu.medusa.proxy.rosmessage.handler;
 
 import com.yebisu.medusa.controller.dto.Point;
-import com.yebisu.medusa.proxy.rosmessage.ROSMessageProxy;
+import com.yebisu.medusa.proxy.rosmessage.MedusaRestProxy;
 import com.yebisu.medusa.proxy.rosmessage.dto.Content;
+import com.yebisu.medusa.util.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -14,9 +16,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -24,18 +24,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 
 @Component
 @Slf4j
-public class ROSMessageProxyHandler implements ROSMessageProxy {
+public class MedusaProxyHandler implements MedusaRestProxy {
 
     public static final String INTERNAL_SERVER_ERROR = "Internal Server error";
+
 
     @Value("${vehicle.state.uri}")
     private String urlROSMessageState;
 
     @Override
-    public Content pingForROSMessageState(final String ip) {
+    public Content getVehicleState(final String ip) {
         return invokeROSMessage(ip);
     }
 
@@ -65,7 +68,7 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
         Path tempFile;
         try {
-            tempFile = Files.createTempFile("httpResponse", "xml");
+            tempFile = Files.createTempFile(LocalDateTime.now().toString(), "xml");
             Files.write(tempFile, httpResponse.body().getBytes(StandardCharsets.UTF_8));
         } catch (IOException exception) {
             log.error("An error occurred while trying to create a temp file");
@@ -103,16 +106,36 @@ public class ROSMessageProxyHandler implements ROSMessageProxy {
 
     @Override
     public Mono<ResponseEntity<Void>> moveVehicleTo(final String vehicleIP, final Point point) {
-        return Mono
-                .fromCallable(() -> {
-                    URL url = new URL("http://" + vehicleIP + ":7080/RSET%20/controls/send_wp_standard%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}");
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("GET");
-                    int responseCode = con.getResponseCode();
-                    con.disconnect();
-                    return responseCode;
-                })
+        final var urlConnection = "http://" + vehicleIP + ":7080/RSET%20/controls/send_wp_standard%20geometry_msgs/PointStamped%20{\"point\":{\"x\":" + point.getX() + ",\"y\":" + point.getY() + "}}";
+        return Mono.fromCallable(() -> HttpUtils.supplyWithHttpConnector(urlConnection))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(i -> Mono.empty());
     }
+
+    @Override
+    public Flux<Void> executeMission(final String coordinates, Flux<String> vehiclesIPs) {
+        return Flux.from(vehiclesIPs)
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+                .filter(vehicleIP -> !vehicleIP.isEmpty())
+                .map(vehicleIP -> composeURL(vehicleIP, coordinates))
+                .flatMap(composedURL -> invokeMedusaServer(composedURL)
+                        .onErrorContinue((t, o) -> log.error("Skipped error: {}", t.getMessage())))
+                .ordered(Comparator.comparing(ResponseEntity::getStatusCode))
+                .flatMap(voidResponseEntity -> Flux.empty());
+    }
+
+    private String composeURL(String vehicleIP, String coordinates) {
+        var composedURI = "http://" + vehicleIP + ":7080/" + coordinates;
+        log.info("Invoking mission execute with URL: {}", composedURI);
+        return composedURI;
+    }
+
+    private Mono<ResponseEntity<Void>> invokeMedusaServer(final String composedURI) {
+        return Mono.fromCallable(() -> HttpUtils.supplyWithHttpConnector(composedURI))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(i -> Mono.empty());
+    }
+
+
 }

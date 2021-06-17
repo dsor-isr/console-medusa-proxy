@@ -5,11 +5,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class CoordinatesDTO {
-    private String x;
-    private String y;
+public class LineDTO {
+    private Integer index;
+    private List<CoordinatesDTO> coordinates = new LinkedList<>();;
 }
