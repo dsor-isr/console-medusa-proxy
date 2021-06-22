@@ -15,5 +15,5 @@ public class VehicleDetails {
     private String vehicleId;
 
     @NotEmpty(message = "velocity cannot be null")
-    private Long velocity;
+    private Double velocity;
 }
