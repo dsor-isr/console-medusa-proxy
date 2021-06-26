@@ -5,11 +5,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class CoordinatesDTO {
-    private String x;
-    private String y;
+public class ArcDTO {
+    private Integer index;
+    private Integer direction;
+    private Double radius;
+    private List<CoordinatesDTO> coordinates;
 }
