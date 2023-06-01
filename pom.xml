@@ -18,7 +18,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <javax.xml.bind.version>1.4.0</javax.xml.bind.version>
     </properties>
 
